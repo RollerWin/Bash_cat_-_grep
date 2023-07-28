@@ -21,12 +21,11 @@ void default_print_files(char*, FILE*);
 enum Cat_flags {
   NON_EMPTY_LINE_NUMBERING_FLAG = 'b',
   DOLLAR_DISPLAY_FLAG = 'e',
+  GNU_DOLLAR_DISPLAY_FLAG = 'E',
   LINE_NUMBERING_FLAG = 'n',
   STRING_COMPRESSION_FLAG = 's',
   TAB_REPLACEMENT_FLAG = 't',
+  GNU_TAB_REPLACEMENT_FLAG = 'T'
 };
-
-
-
 
 #endif
