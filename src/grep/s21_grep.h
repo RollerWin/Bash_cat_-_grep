@@ -44,8 +44,11 @@ void detect_multifile(int, int, int*);
 void detect_insensitive_flag(flags, int*);
 void detect_invert_flag(flags, int*);
 void print_file_name(int, int, flags, char**);
-void read_strings(int i, int is_multifile, int* counter, int *l_match, char* argv[],
-                  FILE* user_file, regex_t reg, flags input_flags);
-void read_string_back(int i, int is_multifile, int* counter, int* l_match, char*argv[], flags input_flags, int no_matches, int string_number, char* text_string);
+void read_strings(int i, int is_multifile, int* counter, int* l_match,
+                  char* argv[], FILE* user_file, regex_t reg,
+                  flags input_flags);
+void read_string_back(int i, int is_multifile, int* counter, int* l_match,
+                      char* argv[], flags input_flags, int no_matches,
+                      int string_number, char* text_string);
 
 #endif
