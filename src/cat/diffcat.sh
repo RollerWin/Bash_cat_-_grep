@@ -1,4 +1,3 @@
-filename=Makefile;
 echo ----------------------------------------------*CAT 1
 diff <(cat -b text.txt) <(./s21_cat -b text.txt) -s
 echo ----------------------------------------------*CAT 2
@@ -11,4 +10,3 @@ echo ----------------------------------------------*CAT 5
 diff <(cat -s "text.txt") <(./s21_cat -s "text.txt") -s
 echo ----------------------------------------------*CAT 6
 diff <(cat -t "text.txt") <(./s21_cat -t "text.txt") -s
-
