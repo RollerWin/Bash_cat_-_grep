@@ -1,56 +1,37 @@
 #include <stdio.h>
+
 #include "s21_grep.h"
 
+const char* cat_message = "grep: ";
+const char* wrong_file_message = ": No such file or directory";
+const int template_length = 10240;
+const int file_name_length = 64;
+
 int main(int argc, char* argv[]) {
-    int flag;
-    flags input_flags = {0};
+  flags input_flags = {0};
+  char template_words[template_length];
+  input_flags = detect_flags(argc, argv, template_words, input_flags);
+  edit_templates(&optind, argv, template_words, input_flags);
+  print_strings(optind, argc, argv, template_words, input_flags);
+  return 0;
+}
 
-    char template_words[10000];
+void choose_error_stream(int first_file_position, char* argv) {
+  char error_message[file_name_length];
+  build_error_message(argv, error_message);
 
-    while ((flag = getopt_long(argc, argv, "e:f:ivclnhso", NULL, 0)) != -1)
-    {
-        switch(flag) {
-            case TEMPLATE_FLAG:
-            input_flags.template_flag_e = 1;
-            break;
+  if (first_file_position == 1) {
+    print_default_error_message(error_message);
+  } else if (first_file_position == 2) {
+    print_flag_error_message(error_message);
+  }
+}
 
-            case CASE_INSENSITIVE_FLAG:
-            input_flags.case_insensitive_flag_i = 1;
-            break;
+void print_default_error_message(char* error_message) { perror(error_message); }
+void print_flag_error_message(char* error_message) { perror(error_message); }
 
-            case INVERTED_SEARCH_FLAG:
-            input_flags.inverted_search_flag_v = 1;
-            break;
-            
-            case MATCH_COUNTER_FLAG:
-            input_flags.match_counter_flag_c = 1;
-            break;
-
-            case MATCHING_FILES_FLAG:
-            input_flags.matching_files_flag_l = 1;
-            break;
-
-            case LINE_NUMBERING_FLAG:
-            input_flags.line_numbering_flag_n = 1;
-            break;
-
-            case FILE_IGNORE_FLAG:
-            input_flags.file_ignore_flag_h = 1;
-            break;
-
-            case ERROR_IGNORE_FLAG:
-            input_flags.error_ignore_flag_s = 1;
-            break;
-
-            case REGEX_FILE_FLAG:
-            input_flags.regex_file_flag_f = 1;
-            break;
-
-            case MATCHING_SEQUENCE_FLAG:
-            input_flags.matching_sequence_flag_o = 1;
-            break;
-        }
-    }
-    
-    return 0;
+char* build_error_message(char* file_name, char* error_message) {
+  strcat(error_message, cat_message);
+  strcat(error_message, file_name);
+  return error_message;
 }
