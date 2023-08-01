@@ -2,12 +2,11 @@ CC = gcc
 CFlags = -Wall -Werror -Wextra
 
 Cat = s21_cat
-Grep = s21_grep
 
 CompileMain = main.o
 Main = main.c
-CompileInput = input.o
-Input = input.c
+CompileInput = s21_cat.o
+Input = s21_cat.c
 
 all: $(Cat)
 
