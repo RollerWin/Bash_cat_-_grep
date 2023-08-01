@@ -1,7 +1,6 @@
 CC = gcc
 CFlags = -Wall -Werror -Wextra
 
-Cat = s21_cat
 Grep = s21_grep
 
 CompileMain = main.o

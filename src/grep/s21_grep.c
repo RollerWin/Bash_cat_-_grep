@@ -1,8 +1,9 @@
 #include "s21_grep.h"
 
-#include <string.h>
-
+const char* cat_message = "grep: ";
+const char* wrong_file_message = ": No such file or directory";
 const int text_string_length = 10240;
+const int file_name_length = 64;
 
 flags detect_flags(int argc, char* argv[], char* template_words,
                    flags input_flags) {
@@ -11,6 +12,12 @@ flags detect_flags(int argc, char* argv[], char* template_words,
   while ((flag = getopt_long(argc, argv, "e:f:ivclnhso", NULL, 0)) != -1) {
     indicate_each_flag(flag, template_words, &input_flags);
   }
+
+  if (input_flags.matching_sequence_flag_o &&
+      input_flags.inverted_search_flag_v) {
+    input_flags.matching_sequence_flag_o = 0;
+  }
+
   return input_flags;
 }
 
@@ -52,7 +59,7 @@ void indicate_each_flag(int flag, char* template_words, flags* input_flags) {
 
     case REGEX_FILE_FLAG:
       input_flags->regex_file_flag_f = 1;
-      open_reg_file(optarg, template_words, *input_flags);
+      open_reg_file(optarg, template_words);
       break;
 
     case MATCHING_SEQUENCE_FLAG:
@@ -61,17 +68,20 @@ void indicate_each_flag(int flag, char* template_words, flags* input_flags) {
   }
 }
 
-void open_reg_file(char* optarg, char* template_words, flags input_flags) {
+void open_reg_file(char* optarg, char* template_words) {
   FILE* reg_file;
 
   if ((reg_file = fopen(optarg, "r")) == NULL) {
-    if (!input_flags.error_ignore_flag_s) {
-      choose_error_stream(1, optarg);
-    }
+    print_error_message(optarg);
   } else {
     char text_string[text_string_length];
-    strcat(template_words, fgets(text_string, text_string_length, reg_file));
-    strcat(template_words, "|");
+    while (fgets(text_string, text_string_length, reg_file)) {
+      if (text_string[strlen(text_string) - 1] == '\n') {
+        text_string[strlen(text_string) - 1] = '\0';
+      }
+      strcat(template_words, text_string);
+      strcat(template_words, "|");
+    }
   }
 }
 
@@ -87,18 +97,12 @@ void edit_templates(int* optind, char* argv[], char* template_words,
 
 void print_strings(int optind, int argc, char* argv[], char* template_words,
                    flags input_flags) {
-  // char text_string[text_string_length]; //---
-
   FILE* user_file;
   regex_t reg;
-  // regmatch_t start; //---
-
   int regex_settings = REG_EXTENDED;
   int is_multifile = 0;
-  // int no_matches; //---
-  int counter; //---
-  // int l_match = 1; //---
-  // int string_number = 1; //---
+  int counter;
+  int l_match;
   detect_multifile(argc, optind, &is_multifile);
   detect_insensitive_flag(input_flags, &regex_settings);
 
@@ -107,51 +111,24 @@ void print_strings(int optind, int argc, char* argv[], char* template_words,
 
     if ((user_file = fopen(argv[i], "r")) == NULL) {
       if (!input_flags.error_ignore_flag_s) {
-        choose_error_stream(1, argv[i]);
+        print_error_message(argv[i]);
       }
     } else {
       counter = 0;
-      // while (fgets(text_string, text_string_length, user_file) && l_match) {
-      //   no_matches = regexec(&reg, text_string, 1, &start, 0);
-      //   detect_invert_flag(input_flags, &no_matches);
-
-      //   if (!no_matches) {
-      //     if (!(input_flags.match_counter_flag_c ||
-      //           input_flags.matching_files_flag_l)) {
-      //       print_file_name(i, is_multifile, input_flags, argv);
-
-      //       if (input_flags.line_numbering_flag_n) {
-      //         printf("%d:", string_number);
-      //       }
-
-      //       printf("%s", text_string);
-      //     }
-      //     if (input_flags.match_counter_flag_c) {
-      //       counter++;
-      //     }
-      //     if (input_flags.matching_files_flag_l) {
-      //       l_match = 0;
-      //     }
-      //   }
-
-      //   string_number++;
-      // }
-      read_and_print_strings(i, is_multifile, &counter, argv,
-                            user_file, reg, input_flags);
+      l_match = 1;
+      read_strings(i, is_multifile, &counter, &l_match, argv, user_file, reg,
+                   input_flags);
       if (input_flags.match_counter_flag_c) {
         print_file_name(i, is_multifile, input_flags, argv);
         printf("%d\n", counter);
       }
 
-      if (input_flags.matching_files_flag_l) {
+      if (input_flags.matching_files_flag_l && !l_match) {
         printf("%s\n", argv[i]);
       }
 
       fclose(user_file);
     }
-
-    // string_number = 1;
-    // l_match = 1;
     regfree(&reg);
   }
 }
@@ -180,17 +157,17 @@ void print_file_name(int i, int is_multifile, flags input_flags, char* argv[]) {
   }
 }
 
-void read_and_print_strings(int i, int is_multifile, int* counter, char* argv[],
-                            FILE* user_file, regex_t reg, flags input_flags) {
-  char text_string[text_string_length];  //---
-  regmatch_t start;                      //---
-  int no_matches;                        //---
-  int l_match = 1;                       //---
-  int string_number = 1;                 //---
+void read_strings(int i, int is_multifile, int* counter, int* l_match, char* argv[],
+                  FILE* user_file, regex_t reg, flags input_flags) {
+  char text_string[text_string_length];
+  regmatch_t start;
+  int no_matches;
+  int string_number = 1;
 
+  *l_match = 1;
   *counter = 0;
 
-  while (fgets(text_string, text_string_length, user_file) && l_match) {
+  while (fgets(text_string, text_string_length, user_file) && *l_match) {
     no_matches = regexec(&reg, text_string, 1, &start, 0);
     detect_invert_flag(input_flags, &no_matches);
 
@@ -202,17 +179,28 @@ void read_and_print_strings(int i, int is_multifile, int* counter, char* argv[],
         if (input_flags.line_numbering_flag_n) {
           printf("%d:", string_number);
         }
-
-        printf("%s", text_string);
+        if (text_string[strlen(text_string) - 1] == '\n') {
+          printf("%s", text_string);
+        } else {
+          printf("%s\n", text_string);
+        }
       }
       if (input_flags.match_counter_flag_c) {
-        *counter+=1;
+        *counter += 1;
       }
       if (input_flags.matching_files_flag_l) {
-        l_match = 0;
+        *l_match = 0;
       }
     }
 
     string_number++;
   }
+}
+
+void print_error_message(char* argv) {
+  char error_message[file_name_length];
+  strcat(error_message, cat_message);
+  strcat(error_message, argv);
+  strcat(error_message, wrong_file_message);
+  fprintf(stderr, "%s\n", error_message);
 }
