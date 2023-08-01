@@ -1,7 +1,10 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include <getopt.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void read_console(int first_file_position, int argc, char* argv[]);
 void detect_flag(int, char**, char*, FILE*);

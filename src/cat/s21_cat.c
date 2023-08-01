@@ -1,10 +1,5 @@
 #include "s21_cat.h"
 
-#include <getopt.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 const char* cat_message = "cat: ";
 const char* wrong_file_message = ": No such file or directory";
 const int text_string_length = 8192;
