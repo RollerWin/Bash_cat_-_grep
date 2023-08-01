@@ -1,6 +1,5 @@
 filename1=text1.txt;
 filename2=text2.txt;
-# filename3 is also used for -f flag patterns:
 filename3=reg.txt;
 echo ----------------------------------------------*GREP 1
 diff <(grep a "$filename2" "$filename1") <(./s21_grep a "$filename2" "$filename1") -s -q
