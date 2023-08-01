@@ -7,9 +7,6 @@ void read_console(int first_file_position, int argc, char* argv[]);
 void detect_flag(int, char**, char*, FILE*);
 
 void print_error_message(char*);
-// char* build_error_message(char*, char*);
-// void print_default_error_message(char* error_message);
-// void print_flag_error_message(char* error_message);
 
 void line_numbering_funtion(char*, FILE*);
 void non_empty_line_numbering_funtion(char*, FILE*);

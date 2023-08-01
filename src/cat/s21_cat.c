@@ -7,7 +7,7 @@
 
 const char* cat_message = "cat: ";
 const char* wrong_file_message = ": No such file or directory";
-const int text_string_length = 1024;
+const int text_string_length = 8192;
 const int file_name_length = 64;
 
 void read_console(int first_file_position, int argc, char* argv[]) {
