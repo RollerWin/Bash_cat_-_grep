@@ -2,7 +2,7 @@
 
 const char* cat_message = "grep: ";
 const char* wrong_file_message = ": No such file or directory";
-const int text_string_length = 10240;
+const int text_string_length = 8192;
 const int file_name_length = 64;
 
 flags detect_flags(int argc, char* argv[], char* template_words,

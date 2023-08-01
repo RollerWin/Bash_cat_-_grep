@@ -1,6 +1,6 @@
 #include "s21_grep.h"
 
-const int template_length = 10240;
+const int template_length = 8192;
 
 int main(int argc, char* argv[]) {
   flags input_flags = {0};
