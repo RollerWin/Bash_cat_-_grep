@@ -13,11 +13,6 @@ flags detect_flags(int argc, char* argv[], char* template_words,
     indicate_each_flag(flag, template_words, &input_flags);
   }
 
-  if (input_flags.matching_sequence_flag_o &&
-      input_flags.inverted_search_flag_v) {
-    input_flags.matching_sequence_flag_o = 0;
-  }
-
   return input_flags;
 }
 
@@ -157,43 +152,48 @@ void print_file_name(int i, int is_multifile, flags input_flags, char* argv[]) {
   }
 }
 
-void read_strings(int i, int is_multifile, int* counter, int* l_match, char* argv[],
-                  FILE* user_file, regex_t reg, flags input_flags) {
+void read_strings(int i, int is_multifile, int* counter, int* l_match,
+                  char* argv[], FILE* user_file, regex_t reg,
+                  flags input_flags) {
   char text_string[text_string_length];
   regmatch_t start;
   int no_matches;
   int string_number = 1;
-
   *l_match = 1;
   *counter = 0;
 
   while (fgets(text_string, text_string_length, user_file) && *l_match) {
     no_matches = regexec(&reg, text_string, 1, &start, 0);
     detect_invert_flag(input_flags, &no_matches);
+    read_string_back(i, is_multifile, counter, l_match, argv, input_flags,
+                     no_matches, string_number, text_string);
+    string_number++;
+  }
+}
 
-    if (!no_matches) {
-      if (!(input_flags.match_counter_flag_c ||
-            input_flags.matching_files_flag_l)) {
-        print_file_name(i, is_multifile, input_flags, argv);
+void read_string_back(int i, int is_multifile, int* counter, int* l_match,
+                      char* argv[], flags input_flags, int no_matches,
+                      int string_number, char* text_string) {
+  if (!no_matches) {
+    if (!(input_flags.match_counter_flag_c ||
+          input_flags.matching_files_flag_l)) {
+      print_file_name(i, is_multifile, input_flags, argv);
 
-        if (input_flags.line_numbering_flag_n) {
-          printf("%d:", string_number);
-        }
-        if (text_string[strlen(text_string) - 1] == '\n') {
-          printf("%s", text_string);
-        } else {
-          printf("%s\n", text_string);
-        }
+      if (input_flags.line_numbering_flag_n) {
+        printf("%d:", string_number);
       }
-      if (input_flags.match_counter_flag_c) {
-        *counter += 1;
-      }
-      if (input_flags.matching_files_flag_l) {
-        *l_match = 0;
+      if (text_string[strlen(text_string) - 1] == '\n') {
+        printf("%s", text_string);
+      } else {
+        printf("%s\n", text_string);
       }
     }
-
-    string_number++;
+    if (input_flags.match_counter_flag_c) {
+      *counter += 1;
+    }
+    if (input_flags.matching_files_flag_l) {
+      *l_match = 0;
+    }
   }
 }
 
